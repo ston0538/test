@@ -1,0 +1,13 @@
+.root {
+  border: 1px solid red;
+  width: 1024px;
+  margin: 0 auto;
+}
+.input {
+  display: block;
+  width: 100px;
+}
+table tr,
+td {
+  border: 1px solid black;
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["styles.css"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA","file":"styles.8986bff4.css","sourceRoot":"..","sourcesContent":[".root {\n  border: 1px solid red;\n  width: 1024px;\n  margin: 0 auto;\n}\n.input {\n  display: block;\n  width: 100px;\n}\ntable tr,\ntd {\n  border: 1px solid black;\n}\n"]}
