@@ -12,9 +12,12 @@ function addItem(event) {
   const nameValue = input.value;
   const quantityValue = parseInt(quantity.value, 10);
   const item = newItem(nameValue, quantityValue);
-  const state = saveLocalItems(item.items());
-  if (!state) {
-    saveLocalItems2(item.items());
+  const state = quantityState(item.items());
+  console.log(state);
+  if (state) {
+    updateQuantity(item.items());
+  } else {
+    saveLocalItems(item.items());
   }
 }
 
@@ -27,22 +30,24 @@ function localStorageStore() {
   }
   return items;
 }
-function saveLocalItems(item) {
-  const items = localStorageStore();
-  let state;
 
-  items.forEach((product) => {
-    if (product.name === item.name) {
-      product.quantity = product.quantity + item.quantity;
-      localStorage.setItem("items", JSON.stringify(items));
-      state = true;
-    } else {
-      state = false;
-    }
+function updateQuantity(item) {
+  const items = localStorageStore();
+  const newItems = items.map((product) => {
+    return product.name === item.name
+      ? { ...product, quantity: product.quantity + item.quantity }
+      : product;
   });
-  return state;
+  console.log(newItems);
+  localStorage.setItem("items", JSON.stringify(newItems));
 }
-function saveLocalItems2(item) {
+
+function quantityState(item) {
+  const items = localStorageStore();
+  const findName = (product) => product.name === item.name;
+  return items.every(findName);
+}
+function saveLocalItems(item) {
   const items = localStorageStore();
   items.push(item);
   localStorage.setItem("items", JSON.stringify(items));
