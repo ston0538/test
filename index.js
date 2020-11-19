@@ -1,61 +1,91 @@
-const tableRoot = document.querySelector(".table_tbody");
-const tableTd = document.querySelectorAll(".table_tbody tr td");
-const button = document.querySelector(".input_wrap button");
+const add = document.querySelector(".input_wrap button.add");
+const del = document.querySelector(".input_wrap button.delete");
 const input = document.querySelector('input[name="name"]');
 const quantity = document.querySelector('input[name="quantity"]');
-let products = [];
-function add(event) {
+const tableRoot = document.querySelector(".table_tbody");
+const tableTr = document.querySelector(".table_tbody tr");
+
+document.addEventListener("DOMContentLoaded", getItems);
+function addItem(event) {
   event.preventDefault();
-  // input 값 받기
+  event.stopPropagation();
   const nameValue = input.value;
-  const quantityValue = quantity.value;
-  // itemsElements(nameValue, quantityValue);
-  console.log(products);
+  const quantityValue = parseInt(quantity.value, 10);
+  const item = newItem(nameValue, quantityValue);
+  const state = saveLocalItems(item.items());
+  if (!state) {
+    saveLocalItems2(item.items());
+  }
 }
-function validation(name, quantity) {
-  // console.log(products);
-  // console.log(name);
-  // console.log(quantity);
-  const newArray = [];
-  products.reduce((acc, currentValue) => {
-    console.log(acc);
-    console.log(currentValue);
-    if (currentValue.name === name) {
-      const result2 = {
-        ...acc,
-        ["name"]: name,
-        ["quantity"]: currentValue.quantity + quantity,
-      };
-      newArray.push(result2);
+
+function localStorageStore() {
+  let items;
+  if (localStorage.getItem("items") === null) {
+    items = [];
+  } else {
+    items = JSON.parse(localStorage.getItem("items"));
+  }
+  return items;
+}
+function saveLocalItems(item) {
+  const items = localStorageStore();
+  let state;
+
+  items.forEach((product) => {
+    if (product.name === item.name) {
+      product.quantity = product.quantity + item.quantity;
+      localStorage.setItem("items", JSON.stringify(items));
+      state = true;
     } else {
-      const result2 = { ...acc, ["name"]: name, ["quantity"]: quantity };
-      newArray.push(result2);
+      state = false;
     }
-  }, {});
-  console.log(newArray);
+  });
+  return state;
 }
-function productUpdate(name, quantity, array) {
-  const product = Object.create(null);
-  product.name = name;
-  product.quantity = quantity;
+function saveLocalItems2(item) {
+  const items = localStorageStore();
+  items.push(item);
+  localStorage.setItem("items", JSON.stringify(items));
 }
-function updateValue(e) {
-  const result = e.target.value;
-  return result;
-}
-function itemsElements(nameValue, quantityValue) {
-  let tr = document.createElement("tr");
-  let name = document.createElement("td");
-  let quantityEle = document.createElement("td");
-  const items = validation(nameValue, quantityValue);
-  items.map((item) => {
-    tableRoot.appendChild(tr);
-    tableRoot.appendChild(name);
-    tableRoot.appendChild(quantityEle);
-    name.textContent = item.name;
-    const numberChange = parseInt(item.quantity, 10);
-    quantityEle.textContent = numberChange;
+function newItem(nameArgs, quantityArgs) {
+  function name() {
+    return nameArgs;
+  }
+  function quantity() {
+    return quantityArgs;
+  }
+  function items() {
+    return { name: name(), quantity: quantity() };
+  }
+  return Object.freeze({
+    name: name(),
+    quantity: quantity(),
+    items,
   });
 }
 
-button.addEventListener("click", add);
+function getItems() {
+  let items;
+  if (localStorage.getItem("items") === null) {
+    items = [];
+  } else {
+    items = JSON.parse(localStorage.getItem("items"));
+  }
+  if (items.length > 0) {
+    items.forEach((item) => {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td");
+      const quantityEle = document.createElement("td");
+      name.innerText = item.name;
+      tr.appendChild(name);
+      quantityEle.innerText = item.quantity;
+      tr.appendChild(quantityEle);
+      tableRoot.appendChild(tr);
+    });
+  }
+}
+function deleteItem() {
+  localStorage.removeItem("items");
+}
+add.addEventListener("click", addItem);
+del.addEventListener("click", deleteItem);

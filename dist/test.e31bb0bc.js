@@ -118,81 +118,112 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"index.js":[function(require,module,exports) {
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var tableRoot = document.querySelector(".table_tbody");
-var tableTd = document.querySelectorAll(".table_tbody tr td");
-var button = document.querySelector(".input_wrap button");
+var add = document.querySelector(".input_wrap button.add");
+var del = document.querySelector(".input_wrap button.delete");
 var input = document.querySelector('input[name="name"]');
 var quantity = document.querySelector('input[name="quantity"]');
-var products = [];
+var tableRoot = document.querySelector(".table_tbody");
+var tableTr = document.querySelector(".table_tbody tr");
+document.addEventListener("DOMContentLoaded", getItems);
 
-function add(event) {
-  event.preventDefault(); // input 값 받기
-
+function addItem(event) {
+  event.preventDefault();
+  event.stopPropagation();
   var nameValue = input.value;
-  var quantityValue = quantity.value; // itemsElements(nameValue, quantityValue);
+  var quantityValue = parseInt(quantity.value, 10);
+  var item = newItem(nameValue, quantityValue);
+  var state = saveLocalItems(item.items());
 
-  console.log(products);
+  if (!state) {
+    saveLocalItems2(item.items());
+  }
 }
 
-function validation(name, quantity) {
-  // console.log(products);
-  // console.log(name);
-  // console.log(quantity);
-  var newArray = [];
-  products.reduce(function (acc, currentValue) {
-    console.log(acc);
-    console.log(currentValue);
+function localStorageStore() {
+  var items;
 
-    if (currentValue.name === name) {
-      var _objectSpread2;
+  if (localStorage.getItem("items") === null) {
+    items = [];
+  } else {
+    items = JSON.parse(localStorage.getItem("items"));
+  }
 
-      var result2 = _objectSpread(_objectSpread({}, acc), {}, (_objectSpread2 = {}, _defineProperty(_objectSpread2, "name", name), _defineProperty(_objectSpread2, "quantity", currentValue.quantity + quantity), _objectSpread2));
+  return items;
+}
 
-      newArray.push(result2);
+function saveLocalItems(item) {
+  var items = localStorageStore();
+  var state;
+  items.forEach(function (product) {
+    if (product.name === item.name) {
+      product.quantity = product.quantity + item.quantity;
+      localStorage.setItem("items", JSON.stringify(items));
+      state = true;
     } else {
-      var _objectSpread3;
-
-      var _result = _objectSpread(_objectSpread({}, acc), {}, (_objectSpread3 = {}, _defineProperty(_objectSpread3, "name", name), _defineProperty(_objectSpread3, "quantity", quantity), _objectSpread3));
-
-      newArray.push(_result);
+      state = false;
     }
-  }, {});
-  console.log(newArray);
+  });
+  return state;
 }
 
-function productUpdate(name, quantity, array) {
-  var product = Object.create(null);
-  product.name = name;
-  product.quantity = quantity;
+function saveLocalItems2(item) {
+  var items = localStorageStore();
+  items.push(item);
+  localStorage.setItem("items", JSON.stringify(items));
 }
 
-function updateValue(e) {
-  var result = e.target.value;
-  return result;
-}
+function newItem(nameArgs, quantityArgs) {
+  function name() {
+    return nameArgs;
+  }
 
-function itemsElements(nameValue, quantityValue) {
-  var tr = document.createElement("tr");
-  var name = document.createElement("td");
-  var quantityEle = document.createElement("td");
-  var items = validation(nameValue, quantityValue);
-  items.map(function (item) {
-    tableRoot.appendChild(tr);
-    tableRoot.appendChild(name);
-    tableRoot.appendChild(quantityEle);
-    name.textContent = item.name;
-    var numberChange = parseInt(item.quantity, 10);
-    quantityEle.textContent = numberChange;
+  function quantity() {
+    return quantityArgs;
+  }
+
+  function items() {
+    return {
+      name: name(),
+      quantity: quantity()
+    };
+  }
+
+  return Object.freeze({
+    name: name(),
+    quantity: quantity(),
+    items: items
   });
 }
 
-button.addEventListener("click", add);
+function getItems() {
+  var items;
+
+  if (localStorage.getItem("items") === null) {
+    items = [];
+  } else {
+    items = JSON.parse(localStorage.getItem("items"));
+  }
+
+  if (items.length > 0) {
+    items.forEach(function (item) {
+      var tr = document.createElement("tr");
+      var name = document.createElement("td");
+      var quantityEle = document.createElement("td");
+      name.innerText = item.name;
+      tr.appendChild(name);
+      quantityEle.innerText = item.quantity;
+      tr.appendChild(quantityEle);
+      tableRoot.appendChild(tr);
+    });
+  }
+}
+
+function deleteItem() {
+  localStorage.removeItem("items");
+}
+
+add.addEventListener("click", addItem);
+del.addEventListener("click", deleteItem);
 },{}],"../../../../.nvm/versions/node/v14.15.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
